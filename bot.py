@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
-import json
 import os
+import json
 import requests
 import asyncio
 
@@ -46,7 +46,7 @@ async def track(ctx, name: str, tag: str):
     with open("tracked_players.json", "w") as f:
         json.dump(data, f, indent=4)
 
-    await ctx.send(f"Tracking {name}#{tag}")
+    await ctx.send(f"Now tracking {name}#{tag}")
 
 
 @tasks.loop(seconds=60)
@@ -62,10 +62,10 @@ async def check_loop():
         players = json.load(f)
 
     for p_id, info in players.items():
-        url = f"https://api.henrikdev.xyz/valorant/v3/matches/na/{info['name']}/{info['tag']}"
-        headers = {"Authorization": VALO_KEY}
-
         try:
+            url = f"https://api.henrikdev.xyz/valorant/v3/matches/na/{info['name']}/{info['tag']}"
+            headers = {"Authorization": VALO_KEY}
+
             r = requests.get(url, headers=headers)
             if r.status_code != 200:
                 continue
@@ -113,7 +113,5 @@ async def check_loop():
 async def before_loop():
     await bot.wait_until_ready()
 
-
-check_loop.start()
 
 bot.run(TOKEN)
