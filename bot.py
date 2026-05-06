@@ -23,7 +23,7 @@ class ValorantBot(commands.Bot):
         self.last_match = {}
 
     async def setup_hook(self):
-        self.check_loop.start()
+        self.match_loop.start()
 
     async def on_ready(self):
         print(f"Logged in as {self.user}")
@@ -46,11 +46,11 @@ async def track(ctx, name: str, tag: str):
     with open("tracked_players.json", "w") as f:
         json.dump(data, f, indent=4)
 
-    await ctx.send(f"Now tracking {name}#{tag}")
+    await ctx.send(f"Tracking {name}#{tag}")
 
 
 @tasks.loop(seconds=60)
-async def check_loop():
+async def match_loop():
     channel = bot.get_channel(CHANNEL_ID)
     if not channel:
         return
@@ -109,7 +109,7 @@ async def check_loop():
             continue
 
 
-@check_loop.before_loop
+@match_loop.before_loop
 async def before_loop():
     await bot.wait_until_ready()
 
