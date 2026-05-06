@@ -12,23 +12,13 @@ CHANNEL_ID = 1501420477091156019
 ROLE_ID = 1501426409632039032
 
 
-class ValorantBot(commands.Bot):
-    def __init__(self):
-        intents = discord.Intents.default()
-        intents.message_content = True
-
-        super().__init__(command_prefix="!", intents=intents, help_command=None)
-
-        self.last_match = {}
-
-    async def setup_hook(self):
-        self.match_loop.start()
-
-    async def on_ready(self):
-        print(f"Logged in as {self.user}")
+intents = discord.Intents.default()
+intents.message_content = True
 
 
-bot = ValorantBot()
+bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
+
+last_match = {}
 
 
 @bot.command()
@@ -76,10 +66,10 @@ async def match_loop():
             match = data[0]
             match_id = match["metadata"]["matchid"]
 
-            if bot.last_match.get(p_id) == match_id:
+            if last_match.get(p_id) == match_id:
                 continue
 
-            bot.last_match[p_id] = match_id
+            last_match[p_id] = match_id
 
             players_list = match["players"]["all_players"]
 
@@ -88,9 +78,6 @@ async def match_loop():
                 if p["name"].lower() == info["name"].lower():
                     agent = p.get("character")
                     break
-
-            if not agent:
-                continue
 
             map_name = match["metadata"].get("map", "Unknown")
             mode = match["metadata"].get("mode", "Unknown")
@@ -111,6 +98,12 @@ async def match_loop():
 @match_loop.before_loop
 async def before_loop():
     await bot.wait_until_ready()
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+    match_loop.start()
 
 
 bot.run(TOKEN)
